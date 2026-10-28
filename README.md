@@ -4,7 +4,7 @@ Portfólio pessoal em React com visual inspirado nas imagens da pasta `stylerefe
 
 ## Executar
 
-Requer Node.js 20.19+ ou 22.12+ e npm.
+Requer Node.js 24.x e npm.
 
 ```bash
 npm install
