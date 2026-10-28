@@ -1,75 +1,28 @@
-# Portfólio
+# Portfólio — Eduardo Leite
 
-Este repositório foi criado para armazenar arquivos relacionados ao meu site de portfólio. O site exibe uma coleção dos meus projetos e trabalhos anteriores.
+Portfólio pessoal em React com visual inspirado nas imagens da pasta `stylereference`. A página apresenta Ninho, Codei e CheckSerie, os projetos públicos mais recentes do [GitHub de Eduardo](https://github.com/oeduardodev?tab=repositories) consultados em 27/10/2026.
 
-## Como Iniciar
+## Executar
 
-Siga as instruções abaixo para configurar e iniciar o ambiente de desenvolvimento:
-
-### Pré-requisitos
-
-Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
-
-### Instalação
-
-1. Clone este repositório em seu ambiente local:
-
-```bash
-git clone https://github.com/seu-usuario/portfolio.git
-```
-
-2. Navegue até o diretório do projeto:
-
-```bash
-cd portfolio
-```
-
-3. Instale as dependências usando o npm (ou yarn, se preferir):
+Requer Node.js 20.19+ ou 22.12+ e npm.
 
 ```bash
 npm install
-```
-
-### Scripts Disponíveis
-
-No diretório do projeto, você pode executar os seguintes comandos:
-
-- Iniciar o servidor JSON para fornecer dados simulados (usado para desenvolvimento):
-
-```bash
-npm run backend
-```
-
-- Iniciar o ambiente de desenvolvimento com Vite:
-
-```bash
 npm run dev
 ```
 
-Isso iniciará um servidor de desenvolvimento local e abrirá o site no navegador.
-
-- Construir o projeto para implantação:
+Abra o endereço exibido pelo Vite. Para gerar e conferir a versão de produção:
 
 ```bash
 npm run build
-```
-
-- Visualizar o projeto de produção construído localmente:
-
-```bash
 npm run preview
 ```
 
-### Tecnologias Utilizadas
+## Estrutura
 
-- [React](https://reactjs.org/)
-- [React Router](https://reactrouter.com/)
-- [React Icons](https://react-icons.github.io/react-icons/)
-- [AOS](https://github.com/michalsnik/aos)
-- [JSON Server](https://github.com/typicode/json-server)
-- [Vite](https://vitejs.dev/)
-- [Eslint](https://www.npmjs.com/package/eslint)
+- `src/App.jsx`: conteúdo, navegação, alternância PT/EN e componentes da página.
+- `src/App.css`: layout responsivo e identidade visual.
+- `src/data/projects.js`: projetos selecionados, tecnologias e links.
+- `public/eduardo-avatar.png`: foto pública do perfil do GitHub, armazenada localmente.
 
-
-## Acesse Aqui
-https://portfolio-em-react-js.vercel.app/
+Os projetos são uma seleção editorial salva no código para que o site funcione sem depender da API do GitHub em tempo de execução. Para atualizar a seleção, edite `src/data/projects.js` após conferir os repositórios e seus links.
