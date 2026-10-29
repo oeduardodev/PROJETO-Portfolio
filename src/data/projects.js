@@ -1,34 +1,28 @@
-// Repositórios públicos com atividade mais recente em 27/10/2026.
-// https://github.com/oeduardodev?tab=repositories
 export const projects = [
   {
-    name: "Ninho",
+    name: "QualiQ",
     year: "2026",
-    art: "ninho",
-    mark: "n",
-    artLabel: "um espaço para acolher",
-    stack: ["React Native", "Expo", "NestJS", "PostgreSQL"],
-    description: {
-      pt: "Aplicativo de saúde mental com autenticação e uma comunidade para compartilhar e acolher.",
-      en: "A mental health app with authentication and a community built for sharing and support.",
-    },
-    links: [
-      {
-        kind: "frontend",
-        url: "https://github.com/oeduardodev/PROJETO-Ninho-frontend",
-      },
-      {
-        kind: "backend",
-        url: "https://github.com/oeduardodev/PROJETO-Ninho-backend",
-      },
+    images: [
+      "/projects/qualiq-login.webp",
+      "/projects/qualiq-dimensoes.webp",
+      "/projects/qualiq-slas.webp",
     ],
+    stack: ["Angular", "TypeScript", "Supabase", "Tailwind CSS"],
+    description: {
+      pt: "Sistema de Gestão da Qualidade (SGQ) que transforma informação em conhecimento, decisão e melhoria contínua.",
+      en: "A Quality Management System (QMS) that turns information into knowledge, decisions, and continuous improvement.",
+    },
+    links: [],
+    demo: "https://qualiq-homo.vercel.app",
   },
   {
     name: "Codei",
     year: "2026",
-    art: "codei",
-    mark: "</>",
-    artLabel: "conectando devs",
+    images: [
+      "/projects/codei-perfil.webp",
+      "/projects/codei-post.webp",
+      "/projects/codei-feed.webp",
+    ],
     stack: ["Angular", "TypeScript", "AdonisJS", "Socket.IO"],
     description: {
       pt: "Rede social para desenvolvedores com feed, perfis, amizades e mensagens em tempo real.",
@@ -47,20 +41,26 @@ export const projects = [
     demo: "https://projeto-codei-frontend.vercel.app",
   },
   {
-    name: "CheckSerie",
-    year: "2025",
-    art: "checkserie",
-    mark: "✓",
-    artLabel: "sua lista de séries",
-    stack: ["React Native", "Expo", "TypeScript", "AsyncStorage"],
+    name: "Ninho",
+    year: "2026",
+    images: [
+      "/projects/ninho-login.webp",
+      "/projects/ninho-cadastro.webp",
+      "/projects/ninho-comunidade.webp",
+    ],
+    stack: ["React Native", "Expo", "NestJS", "PostgreSQL"],
     description: {
-      pt: "App mobile para organizar séries, marcar o que já foi assistido e manter a lista salva no dispositivo.",
-      en: "A mobile app to organize shows, mark watched titles and keep the list saved on your device.",
+      pt: "Aplicativo de saúde mental com autenticação e uma comunidade para compartilhar e acolher.",
+      en: "A mental health app with authentication and a community built for sharing and support.",
     },
     links: [
       {
-        kind: "code",
-        url: "https://github.com/oeduardodev/PROJETO-CheckSerie",
+        kind: "frontend",
+        url: "https://github.com/oeduardodev/PROJETO-Ninho-frontend",
+      },
+      {
+        kind: "backend",
+        url: "https://github.com/oeduardodev/PROJETO-Ninho-backend",
       },
     ],
   },

@@ -49,7 +49,7 @@ const copy = {
       "Medir o progresso da programação por linhas de código é como medir o progresso da construção de aeronaves em termos de peso.",
     quoteAttribution: "Bill Gates, Tradução Livre.",
     projects: "projetos",
-    projectsIntro: "Trabalhos recentes publicados no meu GitHub.",
+    projectsIntro: "Projetos recentes com interfaces web e mobile.",
     allRepos: "Todos os repositórios",
     frontend: "Frontend",
     backend: "API",
@@ -129,7 +129,7 @@ const copy = {
       "Measuring programming progress by lines of code is like measuring aircraft construction progress by weight.",
     quoteAttribution: "Bill Gates, Tradução Livre.",
     projects: "projects",
-    projectsIntro: "Recent work published on my GitHub.",
+    projectsIntro: "Recent web and mobile projects.",
     allRepos: "All repositories",
     frontend: "Frontend",
     backend: "API",
@@ -218,12 +218,55 @@ function SectionHeading({ id, title, intro, action }) {
   );
 }
 
+function ProjectGallery({ project, language }) {
+  const [activeImage, setActiveImage] = useState(0);
+  const { images } = project;
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const interval = window.setInterval(() => {
+      setActiveImage((current) => (current + 1) % images.length);
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [images]);
+
+  const galleryLabel = language === "pt"
+    ? `${project.name}: imagem ${activeImage + 1} de ${images.length}. Clique para ver a próxima.`
+    : `${project.name}: image ${activeImage + 1} of ${images.length}. Click to see the next one.`;
+
+  return (
+    <button
+      className={`project-art project-art--${project.name.toLowerCase()}`}
+      type="button"
+      aria-label={galleryLabel}
+      onClick={() => setActiveImage((current) => (current + 1) % images.length)}
+    >
+      {images.map((image, index) => (
+        <img
+          key={image}
+          src={image}
+          alt=""
+          aria-hidden="true"
+          className={index === activeImage ? "is-active" : ""}
+          loading="lazy"
+        />
+      ))}
+      <span className="project-gallery-dots" aria-hidden="true">
+        {images.map((image, index) => (
+          <span key={image} className={index === activeImage ? "is-active" : ""} />
+        ))}
+      </span>
+    </button>
+  );
+}
+
 function ProjectCard({ project, language, t }) {
   return (
     <article className="project-card">
-      <div className="project-art" aria-hidden="true">
-        <img src={project.image ?? "/project-default.png"} alt="" loading="lazy" />
-      </div>
+      <ProjectGallery project={project} language={language} />
       <div className="project-stack">{project.stack.join(" · ")}</div>
       <div className="project-details">
         <div className="project-title-row">
