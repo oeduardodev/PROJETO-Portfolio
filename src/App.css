@@ -993,7 +993,406 @@ section {
   }
 }
 
+/* Motion system: small terminal cues, ambient depth and responsive interactions. */
+body {
+  background-image:
+    radial-gradient(circle at 75% 8%, rgba(127, 13, 28, 0.13), transparent 28%),
+    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: auto, 48px 48px, 48px 48px;
+  background-position: 0 0, 0 0, 0 0;
+  animation: grid-drift 8s linear infinite;
+}
+.scroll-progress {
+  position: fixed;
+  z-index: 100;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-deep), #ff5262);
+  box-shadow: 0 0 14px rgba(198, 26, 43, 0.7);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+.brand-dot {
+  transition: text-shadow 0.3s ease;
+}
+.brand:hover .brand-dot {
+  text-shadow: 0 0 15px var(--accent);
+}
+.primary-nav > a {
+  position: relative;
+}
+.primary-nav > a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.primary-nav > a:hover::after,
+.primary-nav > a:focus-visible::after {
+  transform: scaleX(1);
+}
+.hero {
+  position: relative;
+  isolation: isolate;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 640px;
+  height: 640px;
+  top: -80px;
+  right: -140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(126, 13, 28, 0.16), transparent 66%);
+  pointer-events: none;
+}
+.particle-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero-copy,
+.hero-visual {
+  position: relative;
+  z-index: 1;
+}
+.typed-highlight {
+  display: inline-grid;
+  position: relative;
+  vertical-align: baseline;
+  max-width: 100%;
+  white-space: normal;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.site-shell[lang="pt-BR"] .typed-highlight {
+  white-space: nowrap;
+}
+.typed-measure,
+.typed-visible {
+  grid-area: 1 / 1;
+}
+.typed-measure {
+  visibility: hidden;
+}
+.typed-visible {
+  justify-self: start;
+}
+.motion-enabled .typed-visible::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 0.9em;
+  margin-left: 3px;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  vertical-align: -0.1em;
+  animation: cursor-blink 0.8s steps(1) infinite;
+}
+.motion-enabled .hero-copy > * {
+  animation: hero-enter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.motion-enabled .hero-copy > :nth-child(2) { animation-delay: 0.12s; }
+.motion-enabled .hero-copy > :nth-child(3) { animation-delay: 0.25s; }
+.motion-enabled .hero-copy > :nth-child(4) { animation-delay: 0.38s; }
+.motion-enabled .hero-visual {
+  animation: visual-enter 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.18s both;
+}
+.portrait-frame {
+  transform: translate3d(var(--hero-x, 0px), var(--hero-y, 0px), 0);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
+.hero-visual:hover .portrait-frame {
+  box-shadow: 0 24px 70px rgba(127, 13, 28, 0.27);
+}
+.motion-enabled .portrait-frame img {
+  animation: portrait-breathe 8s ease-in-out infinite alternate;
+}
+.portrait-frame::after {
+  content: "";
+  position: absolute;
+  inset: -70% -100%;
+  background: linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.07) 50%, transparent 58%);
+  transform: translateX(-65%);
+  pointer-events: none;
+}
+.motion-enabled .portrait-frame::after {
+  animation: portrait-scan 9s ease-in-out 2s infinite;
+}
+.hero-geometry {
+  transform: translate3d(var(--hero-x-opposite, 0px), var(--hero-y-opposite, 0px), 0);
+  transition: transform 0.8s ease;
+}
+.motion-enabled .hero-geometry i:first-child {
+  animation: geometry-drift 7s ease-in-out infinite alternate;
+}
+.motion-enabled .hero-geometry i:last-child {
+  animation: geometry-drift 8s ease-in-out -4s infinite alternate-reverse;
+}
+.motion-enabled .hero-dots,
+.motion-enabled .skills-decoration .dot-grid {
+  animation: dots-breathe 5s ease-in-out infinite alternate;
+}
+.working-badge {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+.motion-enabled .badge-square {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+.outline-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+.outline-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.13) 50%, transparent 80%);
+  transform: translateX(-130%);
+  transition: transform 0.55s ease;
+}
+.outline-button:hover::before,
+.outline-button:focus-visible::before {
+  transform: translateX(130%);
+}
+.outline-button:hover {
+  box-shadow: 0 8px 25px rgba(198, 26, 43, 0.2);
+}
+.outline-button svg,
+.heading-action svg,
+.text-link svg {
+  transition: transform 0.3s ease;
+}
+.outline-button:hover svg,
+.heading-action:hover svg,
+.text-link:hover svg {
+  transform: translate(3px, -2px);
+}
+.motion-enabled [data-reveal] {
+  opacity: 0;
+  translate: 0 30px;
+  transition: opacity 0.75s ease, translate 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.motion-enabled [data-reveal].is-visible {
+  opacity: 1;
+  translate: 0 0;
+}
+.motion-enabled .project-grid > :nth-child(2),
+.motion-enabled .experience-grid > :nth-child(2),
+.motion-enabled .skill-grid > :nth-child(2) { transition-delay: 0.08s; }
+.motion-enabled .project-grid > :nth-child(3),
+.motion-enabled .experience-grid > :nth-child(3),
+.motion-enabled .skill-grid > :nth-child(3) { transition-delay: 0.16s; }
+.motion-enabled .project-grid > :nth-child(4),
+.motion-enabled .skill-grid > :nth-child(4) { transition-delay: 0.24s; }
+.heading-rule {
+  transform-origin: left;
+}
+.motion-enabled .section-heading .heading-rule {
+  transform: scaleX(0);
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s;
+}
+.motion-enabled .section-heading.is-visible .heading-rule {
+  transform: scaleX(1);
+}
+.project-card,
+.experience-card,
+.skill-card,
+.education-card,
+.contact-card {
+  position: relative;
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.project-card::before,
+.experience-card::before,
+.skill-card::before,
+.education-card::before,
+.contact-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(320px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(198, 26, 43, 0.12), transparent 70%);
+  transition: opacity 0.35s ease;
+}
+.project-card:hover,
+.experience-card:hover,
+.skill-card:hover,
+.education-card:hover,
+.contact-card:hover {
+  border-color: rgba(198, 26, 43, 0.7);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25), 0 0 30px rgba(198, 26, 43, 0.07);
+}
+.skill-card:hover,
+.education-card:hover,
+.contact-card:hover {
+  transform: translateY(-6px);
+}
+.project-card:hover::before,
+.experience-card:hover::before,
+.skill-card:hover::before,
+.education-card:hover::before,
+.contact-card:hover::before {
+  opacity: 1;
+}
+.project-art img {
+  transition: opacity 0.45s ease, scale 0.65s ease;
+}
+.project-card:hover .project-art img.is-active {
+  scale: 1.035;
+}
+.project-gallery-dots span.is-active {
+  box-shadow: 0 0 9px #fff;
+}
+.motion-enabled .quote-glyph {
+  animation: quote-float 5s ease-in-out infinite;
+}
+.social-rail a,
+.footer-social a {
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+.social-rail a:hover,
+.footer-social a:hover {
+  transform: translateY(-4px);
+}
+.motion-enabled .decor-square--one { animation: geometry-drift 6s ease-in-out infinite alternate; }
+.motion-enabled .decor-square--two { animation: geometry-drift 8s ease-in-out -2s infinite alternate-reverse; }
+
+/* Board-style props: repeated clicks leave digital damage before a short shatter. */
+[data-glitch-prop] {
+  cursor: crosshair;
+}
+[data-glitch-prop]::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(198, 26, 43, 0.1) 8px, transparent 9px),
+    linear-gradient(90deg, var(--accent) var(--charge, 0%), transparent var(--charge, 0%));
+  background-size: 100% 100%, 100% 3px;
+  background-position: center, left bottom;
+  background-repeat: no-repeat;
+  transition: opacity 0.16s ease;
+}
+[data-glitch-prop]:hover::after,
+[data-glitch-prop]:focus-visible::after {
+  opacity: 0.22;
+}
+[data-glitch-prop][data-damage]::after {
+  opacity: var(--damage-opacity, 0.38);
+}
+[data-glitch-prop][data-damage]:not([data-damage="1"]) {
+  box-shadow: inset 2px 0 rgba(245, 245, 245, 0.25), inset -2px 0 rgba(198, 26, 43, 0.55), 0 0 25px rgba(198, 26, 43, 0.12);
+}
+[data-glitch-prop].is-tapped {
+  animation: glitch-hit 0.18s steps(2, end);
+}
+[data-glitch-prop].is-capturing {
+  cursor: progress;
+}
+[data-glitch-prop].is-breaking {
+  visibility: hidden;
+}
+.glitch-shatter {
+  position: fixed;
+  z-index: 1000;
+  isolation: isolate;
+  pointer-events: none;
+}
+.glitch-shatter::after {
+  content: "";
+  position: absolute;
+  left: var(--impact-x);
+  top: var(--impact-y);
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--glitch-impact-color, var(--accent));
+  border-radius: 50%;
+  box-shadow: 0 0 18px var(--glitch-impact-color, var(--accent));
+  animation: pixel-impact 0.28s ease-out forwards;
+}
+.glitch-shatter__canvas {
+  position: absolute;
+  pointer-events: none;
+}
+
+@keyframes glitch-hit {
+  0%, 100% { transform: translateX(0); filter: none; }
+  25% { transform: translateX(3px) skewX(1deg); filter: drop-shadow(3px 0 var(--accent)); }
+  50% { transform: translateX(-3px) skewX(-1deg); filter: drop-shadow(-3px 0 currentColor); }
+  75% { transform: translateX(2px); }
+}
+@keyframes pixel-impact {
+  from { opacity: 0.8; transform: translate(-50%, -50%) scale(0.2); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+}
+@keyframes cursor-blink { 50% { opacity: 0; } }
+@keyframes hero-enter {
+  from { opacity: 0; transform: translateY(23px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes visual-enter {
+  from { opacity: 0; translate: 0 28px; scale: 0.96; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+@keyframes portrait-breathe {
+  from { transform: scale(1); }
+  to { transform: scale(1.045); }
+}
+@keyframes portrait-scan {
+  0%, 30% { transform: translateX(-65%); }
+  55%, 100% { transform: translateX(65%); }
+}
+@keyframes geometry-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to { transform: translate3d(9px, -12px, 0) rotate(9deg); }
+}
+@keyframes dots-breathe {
+  from { opacity: 0.35; transform: translateY(0); }
+  to { opacity: 0.8; transform: translateY(-8px); }
+}
+@keyframes badge-pulse {
+  50% { box-shadow: 0 0 0 5px rgba(198, 26, 43, 0.12), 0 0 16px rgba(198, 26, 43, 0.6); }
+}
+@keyframes quote-float {
+  50% { transform: translateY(-5px); }
+}
+@keyframes grid-drift {
+  to { background-position: 0 0, 0 48px, 0 48px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  body {
+    animation: none;
+  }
   html {
     scroll-behavior: auto;
   }
@@ -1002,5 +1401,11 @@ section {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+  .skill-card:hover,
+  .education-card:hover,
+  .contact-card:hover,
+  .outline-button:hover {
+    transform: none;
   }
 }

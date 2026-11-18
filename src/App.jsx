@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 import { projects } from "./data/projects";
+import { CLICKS_TO_BREAK, useGlitchProps } from "./useGlitchProps";
 import "./App.css";
 
 const socialLinks = [
@@ -202,9 +203,173 @@ const skillGroups = [
   },
 ];
 
+function useReducedMotion() {
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return reducedMotion;
+}
+
+function TypedHighlight({ text, reducedMotion }) {
+  const [visible, setVisible] = useState(reducedMotion ? text : "");
+
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    setVisible("");
+    const characters = Array.from(text);
+    let current = 0;
+    let interval;
+    const start = window.setTimeout(() => {
+      interval = window.setInterval(() => {
+        current += 1;
+        setVisible(characters.slice(0, current).join(""));
+        if (current === characters.length) window.clearInterval(interval);
+      }, 75);
+    }, 650);
+
+    return () => {
+      window.clearTimeout(start);
+      window.clearInterval(interval);
+    };
+  }, [text, reducedMotion]);
+
+  return (
+    <span className="typed-highlight">
+      <span className="visually-hidden">{text}</span>
+      <span className="typed-measure" aria-hidden="true">{text}</span>
+      <span className="typed-visible" aria-hidden="true">
+        {reducedMotion ? text : visible}
+      </span>
+    </span>
+  );
+}
+
+function ParticleField({ reducedMotion }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    const canvas = canvasRef.current;
+    const hero = canvas.parentElement;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+    let visible = true;
+    let particles = [];
+    const pointer = { x: -1000, y: -1000 };
+
+    const resize = () => {
+      const bounds = hero.getBoundingClientRect();
+      width = bounds.width;
+      height = bounds.height;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(52, Math.max(22, Math.round(width / 25)));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.36,
+        vy: (Math.random() - 0.5) * 0.36,
+        size: Math.random() * 1.4 + 0.65,
+      }));
+    };
+
+    const draw = () => {
+      context.clearRect(0, 0, width, height);
+
+      particles.forEach((particle, index) => {
+        const dx = particle.x - pointer.x;
+        const dy = particle.y - pointer.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance < 120 && distance > 0) {
+          const force = (120 - distance) / 120;
+          particle.x += (dx / distance) * force * 1.6;
+          particle.y += (dy / distance) * force * 1.6;
+        }
+
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        if (particle.x < 0 || particle.x > width) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > height) particle.vy *= -1;
+
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        context.fillStyle = index % 4 === 0 ? "rgba(198, 26, 43, .65)" : "rgba(202, 202, 210, .33)";
+        context.fill();
+
+        for (let next = index + 1; next < particles.length; next += 1) {
+          const other = particles[next];
+          const separation = Math.hypot(particle.x - other.x, particle.y - other.y);
+          if (separation > 95) continue;
+          context.beginPath();
+          context.moveTo(particle.x, particle.y);
+          context.lineTo(other.x, other.y);
+          context.strokeStyle = `rgba(198, 26, 43, ${((95 - separation) / 95) * 0.12})`;
+          context.stroke();
+        }
+      });
+
+      if (visible && !document.hidden) frame = window.requestAnimationFrame(draw);
+    };
+
+    const onPointerMove = (event) => {
+      const bounds = hero.getBoundingClientRect();
+      pointer.x = event.clientX - bounds.left;
+      pointer.y = event.clientY - bounds.top;
+    };
+    const onPointerLeave = () => {
+      pointer.x = -1000;
+      pointer.y = -1000;
+    };
+    const onVisibility = () => {
+      window.cancelAnimationFrame(frame);
+      if (!document.hidden && visible) frame = window.requestAnimationFrame(draw);
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      window.cancelAnimationFrame(frame);
+      if (visible && !document.hidden) frame = window.requestAnimationFrame(draw);
+    });
+    const resizeObserver = new ResizeObserver(resize);
+
+    resize();
+    observer.observe(hero);
+    resizeObserver.observe(hero);
+    hero.addEventListener("pointermove", onPointerMove);
+    hero.addEventListener("pointerleave", onPointerLeave);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      resizeObserver.disconnect();
+      hero.removeEventListener("pointermove", onPointerMove);
+      hero.removeEventListener("pointerleave", onPointerLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [reducedMotion]);
+
+  return <canvas ref={canvasRef} className="particle-field" aria-hidden="true" />;
+}
+
 function SectionHeading({ id, title, intro, action }) {
   return (
-    <div className="section-heading" id={id}>
+    <div className="section-heading" id={id} data-reveal>
       <div className="section-heading-main">
         <h2 id={`${id}-heading`}>
           <span>#</span>
@@ -265,7 +430,7 @@ function ProjectGallery({ project, language }) {
 
 function ProjectCard({ project, language, t }) {
   return (
-    <article className="project-card">
+    <article className="project-card" data-reveal>
       <ProjectGallery project={project} language={language} />
       <div className="project-stack">{project.stack.join(" · ")}</div>
       <div className="project-details">
@@ -305,7 +470,17 @@ function ProjectCard({ project, language, t }) {
 function App() {
   const [language, setLanguage] = useState("pt");
   const [menuOpen, setMenuOpen] = useState(false);
+  const reducedMotion = useReducedMotion();
+  const heroVisualRef = useRef(null);
   const t = copy[language];
+  const glitchProps = reducedMotion ? {} : {
+    "data-glitch-prop": "",
+    role: "button",
+    tabIndex: 0,
+    "aria-describedby": "glitch-instructions",
+  };
+
+  useGlitchProps(reducedMotion, language);
 
   useEffect(() => {
     document.documentElement.lang = language === "pt" ? "pt-BR" : "en";
@@ -313,8 +488,82 @@ function App() {
     document.querySelector('meta[name="description"]')?.setAttribute("content", t.metaDescription);
   }, [language, t]);
 
+  useEffect(() => {
+    if (reducedMotion || !window.IntersectionObserver) return;
+    const elements = document.querySelectorAll("[data-reveal]");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [reducedMotion]);
+
+  useEffect(() => {
+    const progress = document.querySelector(".scroll-progress");
+    let frame = 0;
+    const update = () => {
+      const travel = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.transform = `scaleX(${travel > 0 ? window.scrollY / travel : 0})`;
+      frame = 0;
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) return;
+    const onPointerMove = (event) => {
+      const card = event.target.closest(".project-card, .experience-card, .skill-card, .education-card, .contact-card");
+      if (!card) return;
+      const bounds = card.getBoundingClientRect();
+      card.style.setProperty("--spot-x", `${event.clientX - bounds.left}px`);
+      card.style.setProperty("--spot-y", `${event.clientY - bounds.top}px`);
+    };
+    document.addEventListener("pointermove", onPointerMove, { passive: true });
+    return () => document.removeEventListener("pointermove", onPointerMove);
+  }, [reducedMotion]);
+
+  const moveHero = (event) => {
+    if (reducedMotion || event.pointerType === "touch") return;
+    const visual = heroVisualRef.current;
+    const bounds = visual.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    visual.style.setProperty("--hero-x", `${x * 16}px`);
+    visual.style.setProperty("--hero-y", `${y * 16}px`);
+    visual.style.setProperty("--hero-x-opposite", `${x * -11}px`);
+    visual.style.setProperty("--hero-y-opposite", `${y * -11}px`);
+  };
+
+  const resetHero = () => {
+    const visual = heroVisualRef.current;
+    visual.style.setProperty("--hero-x", "0px");
+    visual.style.setProperty("--hero-y", "0px");
+    visual.style.setProperty("--hero-x-opposite", "0px");
+    visual.style.setProperty("--hero-y-opposite", "0px");
+  };
+
   return (
-    <div className="site-shell" lang={language === "pt" ? "pt-BR" : "en"}>
+    <div className={`site-shell ${reducedMotion ? "" : "motion-enabled"}`} lang={language === "pt" ? "pt-BR" : "en"}>
+      <span className="visually-hidden" id="glitch-instructions">
+        {language === "pt"
+          ? `${CLICKS_TO_BREAK} cliques rápidos, ou Enter ${CLICKS_TO_BREAK} vezes, provocam uma quebra digital temporária.`
+          : `${CLICKS_TO_BREAK} quick clicks, or ${CLICKS_TO_BREAK} Enter presses, trigger a temporary digital break.`}
+      </span>
+      <div className="scroll-progress" aria-hidden="true" />
       <header className="site-header">
         <div className="header-inner page-width">
           <a
@@ -393,22 +642,30 @@ function App() {
           className="hero page-width"
           id="inicio"
           aria-labelledby="hero-title"
+          onPointerMove={moveHero}
+          onPointerLeave={resetHero}
         >
+          <ParticleField reducedMotion={reducedMotion} />
           <div className="hero-copy">
             <p className="eyebrow">
               <span className="eyebrow-line" />
               {t.greeting}
             </p>
             <h1 id="hero-title">
-              {t.heroStart} <span>{t.heroHighlight}</span> {t.heroEnd}
+              {t.heroStart} <TypedHighlight text={t.heroHighlight} reducedMotion={reducedMotion} /> {t.heroEnd}
             </h1>
             <p className="hero-intro">{t.intro}</p>
             <a className="outline-button hero-cta" href="#contato">
               {t.contactMe} <ArrowRight size={17} aria-hidden="true" />
             </a>
           </div>
-          <div className="hero-visual">
-            <div className="hero-geometry" aria-hidden="true">
+          <div className="hero-visual" ref={heroVisualRef}>
+            <div
+              className="hero-geometry"
+              {...glitchProps}
+              aria-label={language === "pt" ? "Geometria digital" : "Digital geometry"}
+              aria-hidden={reducedMotion ? "true" : undefined}
+            >
               <i />
               <i />
             </div>
@@ -416,15 +673,15 @@ function App() {
               <img src="/eduardo-avatar-demo.png" alt={t.portraitAlt} />
             </div>
             <div className="dot-grid hero-dots" aria-hidden="true" />
-            <div className="working-badge">
+            <div className="working-badge" {...glitchProps}>
               <span className="badge-square" />
               {t.working}
             </div>
           </div>
         </section>
 
-        <div className="quote-wrap page-width">
-          <blockquote>
+        <div className="quote-wrap page-width" data-reveal>
+          <blockquote {...glitchProps}>
             <span className="quote-glyph" aria-hidden="true">
               “
             </span>
@@ -475,7 +732,7 @@ function App() {
           />
           <div className="experience-grid">
             {t.experienceItems.map(({ company, role, period, description }) => (
-              <article className="experience-card" key={company}>
+              <article className="experience-card" key={company} data-reveal {...glitchProps}>
                 <p className="experience-period">{period}</p>
                 <h3>{company}</h3>
                 <p className="experience-role">{role}</p>
@@ -503,7 +760,7 @@ function App() {
             </div>
             <div className="skill-grid">
               {skillGroups.map((group) => (
-                <div className="skill-card" key={group.title.en}>
+                <div className="skill-card" key={group.title.en} data-reveal {...glitchProps}>
                   <h3>{group.title[language]}</h3>
                   <p>{group.items}</p>
                 </div>
@@ -518,7 +775,7 @@ function App() {
         >
           <SectionHeading id="sobre" title={t.about} intro={t.aboutIntro} />
           <div className="about-grid">
-            <div className="about-copy">
+            <div className="about-copy" data-reveal>
               <h3>{t.aboutTitle}</h3>
               {t.aboutText.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -532,12 +789,12 @@ function App() {
                 GitHub <ArrowUpRight size={15} aria-hidden="true" />
               </a>
             </div>
-            <div className="about-visual">
+            <div className="about-visual" data-reveal>
               <div className="about-square about-square--back" aria-hidden="true" />
               <div className="about-square about-square--top" aria-hidden="true" />
               <div className="about-square about-square--bottom" aria-hidden="true" />
               <div className="dot-grid" aria-hidden="true" />
-              <div className="about-visual-card">
+              <div className="about-visual-card" {...glitchProps}>
                 <img src="/profile-photo-send.png" alt={t.portraitAlt} />
               </div>
             </div>
@@ -555,7 +812,7 @@ function App() {
           />
           <div className="education-grid">
             {t.educationItems.map(([course, institution], index) => (
-              <div className="education-card" key={course}>
+              <div className="education-card" key={course} data-reveal {...glitchProps}>
                 <span>0{index + 1}</span>
                 <h3>{course}</h3>
                 <p>{institution}</p>
@@ -574,8 +831,8 @@ function App() {
             intro={t.contactIntro}
           />
           <div className="contact-grid">
-            <p>{t.contactBody}</p>
-            <div className="contact-card">
+            <p data-reveal>{t.contactBody}</p>
+            <div className="contact-card" data-reveal>
               <h3>{t.contactTitle}</h3>
               {socialLinks.map(({ label, url, Icon }) => (
                 <a

@@ -12,8 +12,12 @@ export const projects = [
       pt: "Sistema de Gestão da Qualidade (SGQ) que transforma informação em conhecimento, decisão e melhoria contínua.",
       en: "A Quality Management System (QMS) that turns information into knowledge, decisions, and continuous improvement.",
     },
-    links: [],
-    demo: "https://qualiq-homo.vercel.app",
+    links: [
+      {
+        kind: "frontend",
+        url: "https://github.com/oeduardodev/PROJETO-QualiQ-frontend",
+      },
+    ],
   },
   {
     name: "Codei",
@@ -63,5 +67,26 @@ export const projects = [
         url: "https://github.com/oeduardodev/PROJETO-Ninho-backend",
       },
     ],
+  },
+  {
+    name: "Costs",
+    year: "2026",
+    images: [
+      "/projects/cost-1.webp",
+      "/projects/cost-2.webp",
+      "/projects/cost-3.webp",
+    ],
+    stack: ["React", "TypeScript", "React Router", "localStorage"],
+    description: {
+      pt: "Aplicação web para organizar projetos, controlar orçamentos e acompanhar custos de serviços, com os dados salvos no navegador.",
+      en: "A web app to organize projects, control budgets and track service costs, with data saved in the browser.",
+    },
+    links: [
+      {
+        kind: "frontend",
+        url: "https://github.com/oeduardodev/PROJETO-Cost",
+      },
+    ],
+    demo: "https://cost-sistem.vercel.app",
   },
 ];
